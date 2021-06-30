@@ -1,0 +1,24 @@
+body {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    margin: 0;
+    background-color: ghostwhite;
+}
+
+form {
+    margin: auto;
+    width: 90%;
+    min-width: 250px;
+    max-width: 350px;
+}
+
+input {
+    display: block;
+    margin-bottom: 10px;
+    padding: 5px;
+    outline: none;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    width: 100%;
+}
