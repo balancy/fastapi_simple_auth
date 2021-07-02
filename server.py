@@ -13,17 +13,20 @@ from starlette.responses import Response
 
 
 load_dotenv()
+SALT = os.getenv("SALT")
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 users = {
     "balancy": {
         "name": "Павел",
-        "password": "balancy",
+        "password": ("cdefebf452d9621094beec9a6f1e1f7c493ed649b04b4f6588d68071"
+                     "b4910512"),
         "balance": 100_000,
     },
     "random_user": {
         "name": "Василий",
-        "password": "random_user",
+        "password": ("3378f8fcefc976b32e963db33f9891f46de3d112011daace02468e4"
+                     "750d14fbc"),
         "balance": 200_000,
     },
 }
@@ -72,6 +75,14 @@ def extract_username_from_signed_string(username_signed: str) -> Optional[str]:
         return username
 
 
+def is_password_correct(username: str, password: str) -> bool:
+    password_hash = hashlib.sha256(
+        f"{password}{SALT}".encode()
+    ).hexdigest().lower()
+    stored_password_hash = users[username]["password"].lower()
+    return password_hash == stored_password_hash
+
+
 @app.get("/", response_class=HTMLResponse)
 async def index_page(
     request: Request, 
@@ -94,8 +105,8 @@ async def process_login(username: str = Form(...), password: str = Form(...)):
     """"Processes login."""
 
     # check if username and passwords are correct
-    user = users.get(username)
-    if not (user := users.get(username)) or user["password"] != password:
+    if (not (user := users.get(username)) or 
+        not is_password_correct(username, password)):
         return Response("Я вас не знаю", media_type="text/html")
 
     response = fetch_user_greetings(user)
