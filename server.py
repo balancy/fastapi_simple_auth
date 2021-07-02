@@ -7,11 +7,10 @@ import os
 from typing import Optional
 
 from dotenv import load_dotenv
-from fastapi import Cookie, FastAPI, Form, Request
-from fastapi.responses import HTMLResponse
+from fastapi import Cookie, FastAPI, Form, Request, Response
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from starlette.responses import Response
 
 
 load_dotenv()
@@ -112,3 +111,10 @@ async def process_login(username: str = Form(...), password: str = Form(...)):
     response.set_cookie(key="username", value=username_signed)
 
     return response
+
+
+@app.get("/logout")
+async def process_logout(response: Response):
+    response.delete_cookie(key="username")
+    return RedirectResponse(url="/", status_code=302)
+
