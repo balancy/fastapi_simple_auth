@@ -1,6 +1,8 @@
 import base64
+import json
 import hashlib
 import hmac
+import io
 import os
 from typing import Optional
 
@@ -15,21 +17,14 @@ from starlette.responses import Response
 load_dotenv()
 SALT = os.getenv("SALT")
 SECRET_KEY = os.getenv("SECRET_KEY")
+DATA_FILENAME = os.getenv("DATA_FILENAME", "data.json")
 
-users = {
-    "balancy": {
-        "name": "Павел",
-        "password": ("cdefebf452d9621094beec9a6f1e1f7c493ed649b04b4f6588d68071"
-                     "b4910512"),
-        "balance": 100_000,
-    },
-    "random_user": {
-        "name": "Василий",
-        "password": ("3378f8fcefc976b32e963db33f9891f46de3d112011daace02468e4"
-                     "750d14fbc"),
-        "balance": 200_000,
-    },
-}
+try:
+    with open(DATA_FILENAME, "r") as f:
+        users = json.load(f)
+except io.UnsupportedOperation:
+    users = {}
+
 
 app = FastAPI()
 
