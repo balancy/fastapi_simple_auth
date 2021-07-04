@@ -123,6 +123,10 @@ async def process_login(username: str = Form(...), password: str = Form(...)):
 
 
 @app.get("/logout")
-async def process_logout(response: Response):
+async def process_logout(request: Request):
+    response = Response(
+        "Вы разлогинились",
+        media_type="text/html", 
+    )
     response.delete_cookie(key="username")
-    return "You are logged out"
+    return response
