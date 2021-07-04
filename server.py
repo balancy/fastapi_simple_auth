@@ -8,7 +8,7 @@ from typing import Optional
 
 from dotenv import load_dotenv
 from fastapi import Cookie, FastAPI, Form, Request, Response
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -40,13 +40,6 @@ def sign_data(data: str) -> str:
         msg=data.encode(),
         digestmod=hashlib.sha256,
     ).hexdigest().upper()
-
-
-def fetch_user_greetings(user):
-    return Response(
-        f"Привет, {user['name']}. Баланс: {user['balance']}", 
-        media_type="text/html",
-    )
 
 
 def fetch_template(request):
@@ -91,7 +84,11 @@ async def index_page(
         response.delete_cookie(key="username")
         return response
     
-    return fetch_user_greetings(users[valid_username])
+    user = users[valid_username]
+    return Response(
+        f"Привет, {user['name']}. Баланс: {user['balance']}", 
+        media_type="text/html",
+    )
 
 
 @app.post("/login")
@@ -101,9 +98,21 @@ async def process_login(username: str = Form(...), password: str = Form(...)):
     # check if username and passwords are correct
     if (not (user := users.get(username)) or 
         not is_password_correct(username, password)):
-        return Response("Я вас не знаю", media_type="text/html")
+        return Response(
+            json.dumps({
+                "success": False,
+                "message": "Я вас не знаю",
+            }), 
+            media_type="application/json",
+        )
 
-    response = fetch_user_greetings(user)
+    response = Response(
+        json.dumps({
+            "success": True,
+            "message": f"Привет, {user['name']}. Баланс: {user['balance']}", 
+        }),
+        media_type="application/json",
+    )
     
     # signing username cookie
     username_signed = (f"{base64.b64encode(username.encode()).decode()}."
@@ -116,5 +125,4 @@ async def process_login(username: str = Form(...), password: str = Form(...)):
 @app.get("/logout")
 async def process_logout(response: Response):
     response.delete_cookie(key="username")
-    return RedirectResponse(url="/", status_code=302)
-
+    return "You are logged out"
