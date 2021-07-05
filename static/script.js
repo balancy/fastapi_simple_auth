@@ -11,6 +11,9 @@ document.addEventListener("DOMContentLoaded", function(){
         let response_json = await response.json();
         if(response_json.success){
             let body = document.querySelector('body');
+            body.style.display = "block";
+            body.style.padding = "8px";
+            body.style.backgroundColor = "white";
             body.innerHTML = response_json.message;
         }
     })
